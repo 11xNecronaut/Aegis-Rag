@@ -1,185 +1,287 @@
-<h1 align="center">AegisRAG v0.2 </h1>
+ <h1 align="center">AegisRAG</h1>
 
-**A Security Evaluation Lab for Multi-Tenant RAG Systems and Tool-Using AI Agents**
+<p align="center"><b>A Security Evaluation Lab for Multi-Tenant RAG Systems and Tool-Using AI Agents</b></p>
 
-AegisRAG is an experimental security evaluation lab designed to test, harden, and measure the security of multi-tenant Retrieval-Augmented Generation (RAG) systems and tool-using AI agents.
-
-It is not a production product. It is a deliberately vulnerable, measurable environment where security controls can be independently enabled, attacked, evaluated, and explained.
-
-The project is built around one central question:
-
-> When a model can be persuaded to do almost anything, which security controls still hold?
-
-## What's New in v0.2
-
-Version 0.2 replaces the original ChatGPT-built MVP with a more complete and testable security evaluation framework.
-
-It addresses every bug identified during the v0.1 review, with each fix mapped to a regression test in [`docs/CHANGES.md`](docs/CHANGES.md).
-
-Major additions include:
-
-- **Real agent execution loop:** Implements tool-using agent behaviour rather than relying solely on simulated request handling.
-- **Hybrid retrieval:** Combines retrieval strategies for document discovery.
-- **Attack catalogue:** Includes 17 documented attacks, statistical evaluation, and confidence intervals.
-- **Guard-evasion fuzzer:** Generates attack variations to evaluate the effectiveness of heuristic security controls.
-- **Sigma detections:** Includes Sigma rules mapped to MITRE ATLAS and tested against generated telemetry.
-- **AWS infrastructure foundation:** Introduces Terraform configurations for core cloud security components.
-- **Expanded regression testing:** Adds coverage for previously identified vulnerabilities and security invariants.
-
-## Project Status
-
-The following table distinguishes implemented functionality from work that has not yet been validated against live infrastructure.
-
-| Component | Status |
-|---|---|
-| Application, security controls, attack runner, and detections | Implemented and tested locally |
-| Automated test suite | 110+ tests |
-| Sabotage mutation testing | 7/7 deliberate mutations detected |
-| Evaluation results | Reproducible runs using a simulated model |
-| Terraform infrastructure | Parses successfully; Checkov: 82 passed, 0 failed, 9 skipped with documented reasons |
-| Ollama integration | Implemented, not tested against a live service |
-| AWS Bedrock integration | Implemented, not tested against a live service |
-| Cloud deployment | Not implemented |
-| API Gateway, Lambda, Cognito/JWT integration | Not implemented |
-| Real-LLM security evaluation | Pending |
-
-**Important:** The Terraform infrastructure has not been applied. No AWS account was available during development.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.2-blue" alt="Version 0.2">
+  <img src="https://img.shields.io/badge/Python-3-blue" alt="Python 3">
+  <img src="https://img.shields.io/badge/AI%20Security-RAG-red" alt="AI Security">
+  <img src="https://img.shields.io/badge/LLM-Security-purple" alt="LLM Security">
+  <img src="https://img.shields.io/badge/Terraform-AWS-623CE4" alt="Terraform AWS">
+  <img src="https://img.shields.io/badge/Detection-Sigma-orange" alt="Sigma">
+  <img src="https://img.shields.io/badge/MITRE-ATLAS-red" alt="MITRE ATLAS">
+</p>
 
 ---
 
-## Quick Start
+## Contents
 
-### 1. Installation
+- [Overview](#overview)
+- [Objectives](#objectives)
+- [What's New in v0.2](#whats-new-in-v02)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Security Control Architecture](#security-control-architecture)
+- [Attack Evaluation](#attack-evaluation)
+- [Detection Engineering](#detection-engineering)
+- [Repository Structure](#repository-structure)
+- [Quick Start](#quick-start)
+- [Testing and Validation](#testing-and-validation)
+- [Using a Real LLM](#using-a-real-llm)
+- [Infrastructure and Cloud Security](#infrastructure-and-cloud-security)
+- [Scope and Limitations](#scope-and-limitations)
+- [Roadmap](#roadmap)
+- [References](#references)
+- [Disclaimer](#disclaimer)
+- [Author](#author)
 
-Clone the repository and install the project dependencies:
+---
 
-```bash
-git clone <repository-url>
-cd AegisRAG
+## Overview
 
-make install
+AegisRAG is a security evaluation lab designed to investigate vulnerabilities in multi-tenant Retrieval-Augmented Generation (RAG) systems and tool-using AI agents.
+
+It provides a controlled environment where AI security mechanisms can be independently configured, attacked, tested, and measured.
+
+The project explores a fundamental security question:
+
+> When a model can be talked into anything, which security controls still hold?
+
+Rather than treating prompt injection as an isolated problem, AegisRAG examines the security of the entire application surrounding an LLM, including document retrieval, tenant isolation, caching, tool execution, data handling, and outbound communication.
+
+The project is deliberately structured as an experimental security lab, not a production product.
+
+It focuses on two interconnected areas:
+
+- **Offensive AI security evaluation:** Testing prompt injection, cross-tenant data leakage, unauthorized tool execution, information disclosure, and guard evasion.
+- **Defensive AI security engineering:** Implementing deterministic enforcement, probabilistic detection, output filtering, security telemetry, and measurable defensive controls.
+
+The objective is to understand what happens when an AI model behaves unexpectedly and determine which application-level security boundaries remain effective.
+
+## Objectives
+
+- Evaluate security weaknesses in multi-tenant RAG architectures.
+- Investigate direct and indirect prompt injection.
+- Test cross-tenant information disclosure and retrieval isolation.
+- Evaluate tool-using agent security and authorization boundaries.
+- Implement independently configurable security controls.
+- Examine the limitations of keyword-based prompt injection detection.
+- Develop guard-evasion fuzzing techniques.
+- Build an attack catalogue with measurable outcomes.
+- Develop Sigma detections for suspicious AI application activity.
+- Map relevant attack behaviours to MITRE ATLAS.
+- Evaluate defensive effectiveness through controlled experiments.
+- Establish an AWS infrastructure foundation for future deployment.
+
+## What's New in v0.2
+
+Version 0.2 replaces the original MVP with an expanded security evaluation framework.
+
+The update addresses issues identified during the v0.1 review. Each identified bug and corresponding fix is documented in [`docs/CHANGES.md`](docs/CHANGES.md) and mapped to regression tests.
+
+Major additions include:
+
+| Component | Addition |
+|---|---|
+| Agent execution | Real agent loop with tool-using behaviour |
+| Retrieval | Hybrid retrieval pipeline |
+| Attack catalogue | 17 attacks with statistical evaluation |
+| Guard evasion | Fuzzer for generating attack variations |
+| Security controls | Eight independently configurable controls |
+| Detection engineering | 13 single-event Sigma rules and 3 correlation rules |
+| Threat mapping | MITRE ATLAS mapping |
+| Evaluation | Confidence intervals and leave-one-out ablation |
+| Infrastructure | Terraform-based AWS security foundation |
+| Regression testing | 110+ tests and mutation testing |
+
+### Development Status
+
+| Component | Status |
+|---|---|
+| Application and agent execution | Implemented |
+| Security controls | Implemented and tested locally |
+| Attack catalogue and runner | Implemented |
+| Guard-evasion fuzzer | Implemented |
+| Sigma detection rules | Implemented |
+| MITRE ATLAS mapping | Implemented |
+| Automated test suite | 110+ tests |
+| Mutation testing | 7/7 deliberate sabotage mutations detected |
+| Evaluation report | Reproducible simulated-model results |
+| Ollama integration | Implemented, live validation pending |
+| AWS Bedrock integration | Implemented, live validation pending |
+| Terraform foundation | Static validation completed |
+| Cloud deployment | Not implemented |
+| Real-LLM evaluation | Pending |
+
+**Important:** The Terraform configuration has not been applied to an AWS account. The current infrastructure is a foundation, not a completed cloud deployment.
+
+## Features
+
+### 1. Multi-Tenant RAG Security
+
+Evaluates the security boundaries between different tenants in a shared RAG environment.
+
+Key areas include:
+
+- Tenant-scoped document retrieval.
+- SQL-level tenant isolation.
+- Cross-tenant information disclosure testing.
+- Tenant-aware answer caching.
+- Fail-closed behaviour when tenant identity is unavailable.
+
+### 2. Prompt Injection Evaluation
+
+Tests how malicious instructions can influence model behaviour through direct user input and retrieved content.
+
+Evaluation areas include:
+
+- Direct prompt injection.
+- Indirect prompt injection.
+- Multilingual injection attempts.
+- Paraphrased malicious instructions.
+- Retrieved-document poisoning.
+- System prompt extraction.
+- Guard-evasion variations.
+
+### 3. Tool-Using Agent Security
+
+Evaluates security risks introduced when an LLM can invoke application tools.
+
+The implementation includes:
+
+- Tool allowlisting.
+- Strict argument schemas.
+- Rejection of model-supplied tenant identifiers.
+- Human approval for state-changing operations.
+- Tool-call limits.
+- Outbound webhook restrictions.
+
+The objective is to prevent the model from becoming an unauthorized decision-maker over application resources.
+
+### 4. Configurable Security Controls
+
+AegisRAG provides eight independently switchable controls.
+
+Each control can be evaluated individually or as part of a layered defensive configuration.
+
+This makes it possible to compare defensive effectiveness and identify which mechanisms are responsible for blocking particular attacks.
+
+### 5. Attack Evaluation and Fuzzing
+
+The attack framework contains:
+
+- A 17-attack evaluation catalogue.
+- Automated attack execution.
+- Guard-evasion fuzzing.
+- Attack-success measurement.
+- Confidence interval calculations.
+- Leave-one-out ablation analysis.
+- Reproducible evaluation reports.
+
+### 6. Security Detection Engineering
+
+AegisRAG incorporates defensive monitoring through Sigma rules.
+
+Current detection coverage includes:
+
+- 13 single-event Sigma rules.
+- 3 correlation rules.
+- MITRE ATLAS mapping.
+- A subset Sigma rule evaluator.
+- Testing against generated telemetry.
+
+The objective is to evaluate not only whether an attack succeeds but also whether its behaviour generates detectable security events.
+
+---
+
+## Architecture
+
+AegisRAG combines an application layer, retrieval pipeline, LLM integration, configurable security controls, an agent execution loop, and an evaluation framework.
+
+### High-Level Architecture
+
+```mermaid
+flowchart TD
+    A[User Request] --> B[API Layer]
+    B --> C[Input Security Controls]
+    C --> D[Retrieval Pipeline]
+
+    D --> E[Tenant-Scoped Retrieval]
+    E --> F[Retrieval Guard]
+
+    F --> G[LLM / Agent Execution]
+    G --> H[Tool Policy Enforcement]
+
+    H --> I[Tool Execution]
+    I --> G
+
+    G --> J[Output Security Controls]
+    J --> K[Egress Filtering]
+    K --> L[API Response]
+
+    G --> M[Security Telemetry]
+    C --> M
+    D --> M
+    H --> M
+    J --> M
+
+    M --> N[Sigma Detection Evaluation]
+
+    O[Attack Catalogue and Fuzzer] --> B
+    O --> P[Evaluation Runner]
+    N --> P
+    P --> Q[Evaluation Report]
 ```
 
-Alternatively, install manually:
+*The diagram represents the logical security workflow rather than a complete cloud deployment.*
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-```
+### Technology Stack
 
-### 2. Run the Test Suite
-
-```bash
-make test
-```
-
-This executes the unit, regression, and security invariant tests.
-
-### 3. Run the Security Evaluation
-
-```bash
-make eval
-```
-
-Runs the complete attack evaluation matrix and generates:
-
-```text
-results/REPORT.md
-```
-
-The default evaluation takes approximately 15 seconds.
-
-### 4. Start the Application
-
-Seed the database and start the API:
-
-```bash
-make seed && make run
-```
-
-The application will be available at:
-
-```text
-http://127.0.0.1:8000
-```
-
-The default configuration uses the simulated LLM provider.
-
-## Testing the API
-
-AegisRAG includes demonstration tokens for local testing. These tokens are strictly for the lab environment and are rejected when `AEGIS_ENV=prod`.
-
-### Health Check
-
-```bash
-curl -s http://127.0.0.1:8000/health
-```
-
-### Test a Normal RAG Query
-
-Ask a question about documents belonging to Alice's tenant:
-
-```bash
-curl -s http://127.0.0.1:8000/ask \
-  -H "Authorization: Bearer alice-demo-token" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "How many days of paid time off do employees get?"}'
-```
-
-### Test Cross-Tenant Isolation
-
-Attempt to retrieve confidential information belonging to Bob Corp:
-
-```bash
-curl -s http://127.0.0.1:8000/ask \
-  -H "Authorization: Bearer alice-demo-token" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What is the launch project code for Bob Corp?"}'
-```
-
-With `tenant_scope` enabled, Alice cannot retrieve documents belonging to Bob's tenant.
-
-### Inspect Pending Tool Approvals
-
-```bash
-curl -s http://127.0.0.1:8000/approvals \
-  -H "Authorization: Bearer alice-demo-token"
-```
+| Technology | Purpose |
+|---|---|
+| Python | Application backend and security logic |
+| FastAPI | API implementation |
+| SQL | Tenant-scoped data access |
+| Hybrid retrieval | Document retrieval |
+| Ollama | Local LLM integration |
+| AWS Bedrock | Managed LLM integration |
+| Sigma | Security detection rules |
+| MITRE ATLAS | AI threat mapping |
+| Terraform | AWS infrastructure definition |
+| Checkov | Infrastructure security scanning |
+| Pytest | Automated testing |
 
 ---
 
 ## Security Control Architecture
 
-AegisRAG implements eight independently configurable security controls.
-
-They are divided into two categories based on their underlying enforcement mechanisms.
+AegisRAG implements eight security controls divided into two categories.
 
 ### 1. Deterministic Controls
 
-These controls enforce security boundaries using trusted application data and explicit policies.
+These controls enforce explicit security boundaries using trusted application data and predefined policies.
 
-| Control | Purpose |
+| Control | Function |
 |---|---|
-| `tenant_scope` | Enforces tenant isolation through SQL query predicates. The API fails closed when a tenant ID is unavailable. |
-| `cache_isolation` | Prevents cross-tenant cache contamination by including tenant identity in cache keys. |
-| `tool_policy` | Enforces tool allowlists, strict argument schemas, rejection of model-supplied `tenant_id` values, human approval for state-changing operations, and tool-call limits. |
-| `egress_filter` | Removes non-allowlisted URLs and images from outputs and blocks webhook requests to non-allowlisted hosts. |
+| `tenant_scope` | Enforces tenant isolation through SQL query predicates. The API fails closed when tenant identity is missing. |
+| `cache_isolation` | Prevents cross-tenant cache contamination using tenant-specific cache keys. |
+| `tool_policy` | Enforces tool allowlists, strict argument schemas, approval for state-changing operations, and tool-call limits. |
+| `egress_filter` | Removes non-allowlisted URLs and images and blocks webhook requests to non-allowlisted hosts. |
 
 ### 2. Probabilistic Controls
 
-These controls use detection heuristics and input/output analysis. They reduce attack exposure but cannot guarantee prevention.
+These controls use heuristic detection and content analysis to identify potentially malicious instructions and sensitive information.
 
-| Control | Purpose |
+| Control | Function |
 |---|---|
-| `input_guard` | Detects prompt injection using normalized, weighted, and multilingual detection heuristics. |
-| `retrieval_guard` | Applies injection detection to retrieved documents and tool-returned content. Suspicious chunks are quarantined rather than causing the entire request to fail. |
+| `input_guard` | Detects prompt injection through normalized, weighted, and multilingual detection heuristics. |
+| `retrieval_guard` | Examines retrieved documents and tool-returned content for injection attempts. Suspicious chunks are quarantined. |
 | `prompt_hardening` | Uses per-request nonce delimiters and delimiter neutralization to strengthen instruction boundaries. |
 | `output_redaction` | Performs checksum-validated PII and secret redaction, alongside verbatim system-prompt filtering. |
 
-### Control Configuration
+### Security Configuration Modes
 
-AegisRAG supports four predefined security configurations:
+Four configuration presets are available:
 
 | Mode | Enabled Controls |
 |---|---|
@@ -188,29 +290,29 @@ AegisRAG supports four predefined security configurations:
 | `deterministic` | Deterministic controls |
 | `layered` | All eight controls |
 
-Individual controls can also be selected through environment configuration:
+Individual controls can also be selected:
 
 ```bash
 AEGIS_CONTROLS=tool_policy,tenant_scope
 ```
 
-**Detection remains active even when preventive controls are disabled.**
+**Detection remains enabled even when preventive controls are disabled.**
 
-This monitor-mode behaviour allows the evaluation framework to record potential attacks and their effects without necessarily blocking them.
+This monitor-mode behaviour allows the system to record potential attacks and their effects without necessarily blocking them.
 
 ---
 
-## Security Evaluation Results
+## Attack Evaluation
 
-The evaluation currently contains 17 attacks.
+The evaluation framework currently contains 17 attacks targeting different security boundaries.
 
 An attack is considered successful when the attacker's objective is achieved, such as unauthorized information disclosure or execution of a forbidden action.
 
-HTTP status codes alone are not used to determine attack success.
+HTTP response codes alone are not used to determine attack success.
 
-The default simulated model is configured to obey every recognized injected instruction, representing a worst-case compromised-model scenario.
+### Evaluation Results
 
-### Attack Success by Security Configuration
+The following results were obtained using the default simulated LLM provider.
 
 | Configuration | Successful Attacks | Success Rate |
 |---|---:|---:|
@@ -219,99 +321,245 @@ The default simulated model is configured to obey every recognized injected inst
 | Deterministic only | 7/17 | 41% |
 | Layered | 1/17 | 6% |
 
-These results demonstrate the importance of combining deterministic enforcement with probabilistic detection.
-
 ### Key Findings
 
-**1. Deterministic controls provide distinct security boundaries.**
+**Deterministic controls provide independent security boundaries.**
 
-Each deterministic control addresses a different class of failure.
+Removing `tool_policy` re-enables agent-related attacks, including confused-deputy searches, webhook exfiltration, and forged tickets.
 
-- Removing `tool_policy` re-enables agent-related attacks, including confused-deputy searches, webhook exfiltration, and forged tickets.
-- Removing `tenant_scope` or `cache_isolation` reintroduces cross-tenant information disclosure.
+Removing `tenant_scope` or `cache_isolation` reintroduces cross-tenant information disclosure.
 
-No single control replaces the others.
+**Heuristic detection has measurable limitations.**
 
-**2. Keyword-based detection is insufficient.**
+Across 63 attack variants:
 
-Across 63 attack variants against a simulated model that obeys recognized injected instructions:
-
-- The original v0.1 guard missed 83% of variants.
+- The original v0.1 guard missed 83%.
 - The v0.2 guard missed 27%.
 
-Even with the improvements, the guard cannot reliably distinguish malicious instructions such as "create a ticket" from legitimate user requests.
+Even the improved guard cannot reliably distinguish malicious instructions from legitimate requests in every situation.
 
-This demonstrates why heuristic detection should not be treated as a substitute for deterministic authorization.
-
-**3. Some attacks bypass every implemented control.**
+**Some attacks bypass every implemented control.**
 
 Attack D07 requests the system prompt in reverse order.
 
-It bypasses:
+It bypasses the injection guard, canary checks, verbatim filtering, and deterministic controls without generating an alert.
 
-- Injection detection.
-- Canary checks.
-- Verbatim system-prompt filtering.
-- Deterministic security controls.
+This attack demonstrates why sensitive information should not be stored in system prompts where possible.
 
-It also generates no alert.
+**Outcome-based telemetry provides additional detection opportunities.**
 
-D07 is intentionally retained in the attack catalogue because it demonstrates an important architectural weakness: filtering cannot reliably protect secrets that should never have been placed in the system prompt.
+Attacks that evade technique-based detection can still produce observable effects, including unauthorized data access, cross-tenant retrieval, outbound requests, canary exposure, and PII disclosure.
 
-**4. Outcome-based telemetry detects attacks that technique-based rules miss.**
-
-Some attacks evade conventional guard mechanisms through paraphrasing, plain imperative instructions, and cache-related information disclosure.
-
-Detection becomes more reliable when monitoring the resulting security effects:
-
-- Unauthorized data access.
-- Cross-tenant retrieval.
-- Unexpected outbound requests.
-- Canary exposure.
-- PII disclosure.
-
-**5. Security controls introduce usability trade-offs.**
+**Security controls introduce usability trade-offs.**
 
 In the evaluated dataset, the layered configuration:
 
 - Blocks 1 out of 20 harmless questions.
 - Correctly answers 93% of factual questions.
 
-This highlights the need to evaluate both security effectiveness and legitimate application functionality.
+### Evaluation Methodology
 
-### Important: Understanding the Evaluation Methodology
-
-The default model used in the evaluation is a **simulated LLM**, implemented in:
+The default model is a simulated LLM implemented in:
 
 ```text
 app/llm.py
 ```
 
-It is designed to obey recognized instructions in its input with a configurable probability.
+It obeys recognized injected instructions with a configurable probability.
 
-The simulator allows the agent loop and security controls to be evaluated deterministically without requiring a GPU, external API access, or paid inference services.
+The simulator enables deterministic testing of the agent loop and defensive controls without requiring a GPU or external API access.
 
-Consequently, the current evaluation results measure how the implemented security controls behave when confronted with a compromised or instruction-following model.
+These results therefore measure the behaviour of the implemented controls under a simulated compromised-model scenario.
 
 They do **not** establish the security or robustness of any real LLM.
 
-In particular, prompt hardening demonstrates no measurable effect against this simulator because the simulation does not interpret the delimiters.
+Prompt hardening, in particular, shows no measurable effect against the simulator because the simulation does not interpret delimiters.
 
-To evaluate actual model behaviour, use the Ollama or AWS Bedrock provider and generate a separate evaluation report.
+Real-model testing requires running the evaluation against Ollama or AWS Bedrock.
 
-The complete attack results, confidence intervals, and leave-one-out ablation analysis are documented in:
-
-[`results/REPORT.md`](results/REPORT.md)
+Complete evaluation tables, confidence intervals, and leave-one-out ablation results are available in [`results/REPORT.md`](results/REPORT.md).
 
 ---
 
-## Evaluating with a Real LLM
+## Detection Engineering
 
-AegisRAG supports external model providers through configurable LLM integrations.
+AegisRAG incorporates Sigma detection rules to examine the security telemetry generated during attack execution.
+
+The detection layer includes:
+
+| Component | Current Implementation |
+|---|---|
+| Single-event rules | 13 |
+| Correlation rules | 3 |
+| Threat mapping | MITRE ATLAS |
+| Rule evaluation | Subset Sigma evaluator |
+| Telemetry testing | Generated security events |
+
+The detection engineering objective is to connect offensive AI security testing with defensive monitoring.
+
+A successful attack is not the only important outcome. Understanding whether the attack produces observable events, whether those events trigger detections, and where detection coverage fails is equally important.
+
+---
+
+## Repository Structure
+
+```text
+AegisRAG/
+│
+├── README.md
+│
+├── app/
+│   └── Application engine, agent loop, controls,
+│       retrieval, guard, redaction, tools, policy and API
+│
+├── attacks/
+│   └── Attack corpus, 17-attack catalogue,
+│       evaluation runner, fuzzer and statistics
+│
+├── detections/
+│   └── Sigma rules, correlation rules,
+│       and subset evaluator
+│
+├── infra/
+│   └── Terraform AWS infrastructure foundation
+│
+├── docs/
+│   └── Threat model and change log
+│
+├── tests/
+│   └── Unit, regression and security invariant tests
+│
+└── results/
+    └── REPORT.md
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Linux, Windows, or macOS.
+- Python 3.
+- Git.
+- A modern web browser.
+- Make (for the provided Makefile commands).
+
+No external LLM service is required for the default simulated-model evaluation.
+
+### 1. Clone the repository
+
+```bash
+git clone <repository-url>
+cd AegisRAG
+```
+
+### 2. Install dependencies
+
+Using Make:
+
+```bash
+make install
+```
+
+Alternatively:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+### 3. Run the test suite
+
+```bash
+make test
+```
+
+Executes unit, regression, and security invariant tests.
+
+### 4. Run the security evaluation
+
+```bash
+make eval
+```
+
+Executes the complete attack matrix and generates:
+
+```text
+results/REPORT.md
+```
+
+The default evaluation takes approximately 15 seconds.
+
+### 5. Seed the application and start the API
+
+```bash
+make seed && make run
+```
+
+The API will be available at:
+
+```text
+http://127.0.0.1:8000
+```
+
+The default configuration uses the simulated LLM provider.
+
+---
+
+## Testing and Validation
+
+AegisRAG uses automated testing to validate application behaviour and security controls.
+
+### Automated Testing
+
+| Test Category | Purpose |
+|---|---|
+| Unit tests | Validate individual application components |
+| Regression tests | Prevent previously identified bugs from returning |
+| Security invariants | Validate critical security boundaries |
+| Mutation testing | Check whether deliberate sabotage is detected |
+| Attack evaluation | Measure attack outcomes across configurations |
+
+Current testing results:
+
+| Metric | Result |
+|---|---:|
+| Automated tests | 110+ |
+| Deliberate sabotage mutations detected | 7/7 |
+
+### Infrastructure Validation
+
+Terraform configurations were evaluated using Checkov.
+
+| Result | Count |
+|---|---:|
+| Passed | 82 |
+| Failed | 0 |
+| Skipped | 9 |
+
+The skipped checks have documented reasons.
+
+This is static validation only. The Terraform configuration has not been applied to AWS.
+
+### Validation Limitations
+
+The current test results establish local application behaviour under the tested conditions.
+
+They do not establish production readiness, cloud security, or real-world LLM robustness.
+
+Live model evaluation and independent security assessment remain necessary.
+
+---
+
+## Using a Real LLM
+
+AegisRAG includes provider integrations for Ollama and AWS Bedrock.
 
 ### Ollama
 
-Start an Ollama instance and configure the provider:
+Configure a local Ollama model:
 
 ```bash
 export AEGIS_LLM_PROVIDER=ollama
@@ -328,7 +576,7 @@ Install the AWS SDK:
 pip install boto3
 ```
 
-Configure the provider:
+Configure the environment:
 
 ```bash
 export AEGIS_LLM_PROVIDER=bedrock
@@ -338,27 +586,9 @@ export AWS_REGION=<aws-region>
 make run
 ```
 
-Both provider implementations translate transport failures into clean HTTP 502 responses without exposing internal stack traces.
+Both integrations translate transport failures into HTTP 502 responses without exposing internal stack traces.
 
-**Note:** These integrations are implemented but have not yet been validated against live inference services.
-
----
-
-## Sigma Detection Engineering
-
-AegisRAG includes a collection of Sigma detection rules designed to identify suspicious activity within the evaluation environment.
-
-Current detection coverage includes:
-
-- 13 single-event detection rules.
-- 3 correlation rules.
-- MITRE ATLAS mapping.
-- A subset Sigma rule evaluator.
-- Detection testing against generated telemetry.
-
-The objective is to connect offensive testing with defensive monitoring.
-
-Instead of evaluating only whether an attack succeeds, the framework also examines whether its behaviour generates detectable security events.
+**Note:** The provider integrations are implemented but have not yet been validated against live inference services.
 
 ---
 
@@ -366,88 +596,18 @@ Instead of evaluating only whether an attack succeeds, the framework also examin
 
 The `infra/` directory contains a Terraform-based AWS infrastructure foundation.
 
-It currently covers:
+Current infrastructure components include:
 
-- AWS KMS.
-- S3 storage.
+- AWS Key Management Service (KMS).
+- Amazon S3.
 - AWS Secrets Manager.
 - IAM configurations.
 - CloudWatch logging.
 - AWS budget monitoring.
 
-Static validation was performed using Checkov:
+The infrastructure is intended to establish a security-conscious foundation for future cloud deployment.
 
-| Result | Count |
-|---|---:|
-| Passed | 82 |
-| Failed | 0 |
-| Skipped | 9 |
-
-The skipped checks have documented reasons.
-
-**Infrastructure deployment has not been performed.**
-
-The current Terraform configuration is a foundation, not a complete cloud deployment. It does not provision the application runtime, API Gateway, vector database, or Cognito authentication.
-
----
-
-## Repository Structure
-
-```text
-AegisRAG/
-│
-├── app/
-│   ├── Engine and agent execution loop
-│   ├── Security controls
-│   ├── Injection detection
-│   ├── Output redaction
-│   ├── Retrieval pipeline
-│   ├── Tool execution and policy enforcement
-│   └── API implementation
-│
-├── attacks/
-│   ├── Attack corpus
-│   ├── 17-attack catalogue
-│   ├── Evaluation runner
-│   ├── Guard-evasion fuzzer
-│   └── Statistical analysis
-│
-├── detections/
-│   ├── Sigma detection rules
-│   ├── Correlation rules
-│   └── Subset Sigma evaluator
-│
-├── infra/
-│   └── Terraform AWS foundation
-│
-├── docs/
-│   ├── Threat model
-│   └── Change log and regression mapping
-│
-├── tests/
-│   └── Unit, regression, and invariant tests
-│
-└── results/
-    └── REPORT.md
-```
-
----
-
-## Known Limitations and Future Work
-
-AegisRAG is an evolving research and engineering project. Several areas remain incomplete.
-
-### 1. Real-Model Security Evaluation
-
-The existing evaluation harness is ready for real-model testing.
-
-Further validation requires access to a local inference service or AWS Bedrock, followed by repeatable attack evaluations.
-
-### 2. Complete Cloud Deployment
-
-The Terraform infrastructure currently provides a security-oriented foundation.
-
-The following components remain unimplemented:
+However, the following components are not yet implemented:
 
 - AWS Lambda application runtime.
 - API Gateway integration.
@@ -455,58 +615,107 @@ The following components remain unimplemented:
 - Cognito authentication.
 - Complete cloud application deployment.
 
+The infrastructure has not been applied to an AWS account.
+
 Before deployment, Bedrock model availability should be verified in the selected region and budget alerts configured.
-
-### 3. Production-Grade Identity Management
-
-Authentication currently relies on two static demonstration tokens.
-
-Production deployment requires proper per-user identity management and JWT validation against an established identity provider.
-
-### 4. Semantic Embeddings
-
-The current hashing-based embedder is deterministic and dependency-free, but it does not provide semantic understanding.
-
-A production-oriented retrieval pipeline requires a proper embedding model and semantic vector search.
-
-### 5. Transformed Secret Disclosure
-
-D07 demonstrates that secrets can be disclosed through transformations that evade simple string-matching filters.
-
-Future work should investigate semantic similarity detection, transformed-output analysis, and stronger architectural secret isolation.
-
-The preferred mitigation remains keeping sensitive information out of system prompts wherever possible.
-
-### 6. Additional AI and Supply Chain Risks
-
-Further testing is needed for:
-
-- OWASP LLM03: Supply Chain Vulnerabilities.
-- Embedding inversion attacks.
-- Model and dependency integrity.
-- Cost-based denial-of-wallet attacks.
-- More sophisticated resource exhaustion scenarios.
-
-### 7. Independent Security Validation
-
-The same author developed both the attack catalogue and the defensive controls.
-
-This introduces the possibility of blind spots in the evaluation methodology.
-
-Independent validation using tools such as Garak, PyRIT, or Promptfoo would help identify additional attack paths and provide a more objective assessment.
 
 ---
 
-## Project Philosophy
+## Scope and Limitations
 
-AegisRAG is built around a simple security principle:
+AegisRAG currently provides:
 
-**An AI system should never be trusted to enforce the boundaries that its own behaviour can violate.**
+- A local multi-tenant RAG security evaluation environment.
+- An agent execution loop with tool policies.
+- Eight configurable security controls.
+- A 17-attack evaluation catalogue.
+- Guard-evasion fuzzing.
+- Statistical attack evaluation.
+- Sigma detection engineering.
+- MITRE ATLAS mapping.
+- Terraform-based AWS infrastructure definitions.
+- Automated regression and security invariant testing.
 
-Prompt engineering, injection detection, and output filtering are useful defensive layers, but they are not substitutes for authorization, tenant isolation, strict tool policies, and controlled data access.
+It does not currently provide:
 
-The goal is not to prove that an AI system cannot be manipulated.
+- A production-ready SaaS application.
+- Complete cloud deployment.
+- Production-grade identity management.
+- Validated real-LLM security benchmarks.
+- A production semantic embedding pipeline.
+- Comprehensive detection of transformed secret disclosure.
+- Independent third-party security validation.
 
-The goal is to identify what happens when it is manipulated, determine which controls still work, measure the failures, and build systems that remain secure even when the model does not behave as expected.
+### Known Security and Engineering Gaps
 
-**AegisRAG v0.2 | Security Evaluation Lab for Multi-Tenant RAG and AI Agents**
+**Identity management:** Authentication currently uses two static demonstration tokens. Production requires JWT validation against an identity provider.
+
+**Semantic retrieval:** The current hashing embedder is deterministic and dependency-free, but it is not semantic. A proper embedding model and vector search implementation are needed.
+
+**Transformed secret disclosure:** D07 demonstrates that transformed outputs can bypass string-based detection. Semantic or similarity-based detection requires further research.
+
+**Supply-chain security:** Model integrity, dependency risks, and OWASP LLM03 require additional evaluation.
+
+**Denial of wallet:** Cost-based resource exhaustion requires more advanced testing beyond basic rate and request-size limits.
+
+**Independent assessment:** The attack catalogue and defensive controls were developed by the same author. External testing with Garak, PyRIT, or Promptfoo is needed to identify potential blind spots.
+
+---
+
+## Roadmap
+
+- [ ] Evaluate the attack catalogue against live Ollama models.
+- [ ] Validate the AWS Bedrock integration.
+- [ ] Compare results across different LLM providers.
+- [ ] Implement semantic embedding and vector retrieval.
+- [ ] Implement production-grade JWT authentication.
+- [ ] Extend transformed-output secret detection.
+- [ ] Expand AI supply-chain security testing.
+- [ ] Investigate cost-based denial-of-wallet attacks.
+- [ ] Expand Sigma detection coverage.
+- [ ] Improve security telemetry and correlation.
+- [ ] Complete AWS cloud deployment.
+- [ ] Conduct independent security testing with Garak, PyRIT, or Promptfoo.
+
+---
+
+## References
+
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
+- [OWASP GenAI Security Project](https://genai.owasp.org/)
+- [MITRE ATLAS](https://atlas.mitre.org/)
+- [MITRE ATT&CK](https://attack.mitre.org/)
+- [Sigma Rule Specification](https://sigmahq.io/)
+- [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+- [Ollama Documentation](https://ollama.com/)
+- [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
+- [Garak LLM Vulnerability Scanner](https://github.com/NVIDIA/garak)
+- [PyRIT](https://github.com/Azure/PyRIT)
+- [Promptfoo](https://www.promptfoo.dev/)
+
+---
+
+## Disclaimer
+
+AegisRAG is an educational and experimental project intended for AI security research, defensive security engineering, and controlled vulnerability evaluation.
+
+It is not a production security product or a guarantee of protection against prompt injection and other LLM-related attacks.
+
+Use the application, attack scenarios, and security testing capabilities only in environments you own or are explicitly authorized to assess.
+
+---
+
+## Author
+
+**Dipesh**
+
+Cybersecurity Learner | AI Security | Application Security | Detection Engineering
+
+- GitHub: [11xNecronaut](https://github.com/11xNecronaut)
+- LinkedIn: [dipesh1cybersec](https://www.linkedin.com/in/dipesh1cybersec)
+
+*Built to explore the security boundaries of AI applications, evaluate defensive controls, and understand what happens when the model cannot be trusted.*
+
+---
+
+**AegisRAG v0.2 | Security Evaluation Lab for Multi-Tenant RAG and Tool-Using AI Agents**
