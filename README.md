@@ -1,4 +1,4 @@
-# AegisRAG v0.2
+<h1 align="center">AegisRAG v0.2 </h1>
 
 **A Security Evaluation Lab for Multi-Tenant RAG Systems and Tool-Using AI Agents**
 
