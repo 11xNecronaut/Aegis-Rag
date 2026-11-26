@@ -1,0 +1,27 @@
+title: "AegisRAG Injection Payload In Retrieved Content"
+id: ca6dcdb1-58be-4c9e-b5b7-3083f3233c6c
+name: aegis_chunk_quarantined
+status: experimental
+description: "Retrieved or tool-returned content contained an injection payload (indirect prompt injection, RAG poisoning)."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0051.001
+  - atlas.aml.t0070
+  - owasp.llm01
+  - owasp.llm04
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type:
+      - retrieval_chunk_quarantined
+      - retrieval_chunk_flagged
+  condition: selection
+falsepositives:
+  - Legitimate security documentation or red-team exercises.
+level: high

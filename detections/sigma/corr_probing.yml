@@ -1,0 +1,19 @@
+title: "AegisRAG Repeated Injection Attempts From One User"
+id: cfa7585f-9ede-459a-9a11-bd10b367748b
+status: experimental
+description: "Three or more input-guard hits from one user within ten minutes: an attacker iterating on a payload."
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0051.000
+  - atlas.aml.t0068
+correlation:
+  type: event_count
+  rules:
+    - aegis_input_guard
+  group-by:
+    - user_id
+  timespan: 10m
+  condition:
+    gte: 3
+level: high

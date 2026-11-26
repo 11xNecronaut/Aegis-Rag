@@ -1,0 +1,25 @@
+title: "AegisRAG External URL Or Image In Model Output"
+id: 1631621c-20eb-48c4-9367-77b91558e00c
+name: aegis_external_url_output
+status: experimental
+description: "The model output contained a URL or image on a non-allowlisted host, a known exfiltration channel when rendered."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0086
+  - owasp.llm05
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type:
+      - external_url_in_output
+      - output_url_stripped
+  condition: selection
+falsepositives:
+  - Answers that legitimately cite public websites; add them to the allowlist.
+level: high

@@ -1,0 +1,23 @@
+title: "AegisRAG Failed Authentication"
+id: b68d092b-c1a3-4514-b90b-ef9e73cf942e
+name: aegis_auth_failed
+status: experimental
+description: "A request carried a missing or invalid bearer token."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - attack.credential-access
+  - attack.t1110
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: auth_failed
+  condition: selection
+falsepositives:
+  - Mistyped tokens.
+level: low

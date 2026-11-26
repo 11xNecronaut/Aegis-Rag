@@ -1,0 +1,25 @@
+title: "AegisRAG Prompt Injection Detected In User Input"
+id: 0a219a6b-2643-4bfd-b773-865d2c49b4ab
+name: aegis_input_guard
+status: experimental
+description: "The input guard blocked (enforce mode) or would have blocked (monitor mode) a user prompt."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0051.000
+  - owasp.llm01
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type:
+      - input_guard_blocked
+      - input_guard_would_block
+  condition: selection
+falsepositives:
+  - Legitimate security documentation or red-team exercises.
+level: high

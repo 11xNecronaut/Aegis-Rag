@@ -1,0 +1,25 @@
+title: "AegisRAG State-Changing Tool Executed Without Approval"
+id: a6130062-29df-4f1d-9b1f-2984ecc21b14
+name: aegis_unapproved_state_change
+status: experimental
+description: "A state-changing tool ran without human approval."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0053
+  - owasp.llm06
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: tool_call_executed
+    details.state_changing: true
+    details.approved: false
+  condition: selection
+falsepositives:
+  - None expected when tool_policy is on.
+level: high

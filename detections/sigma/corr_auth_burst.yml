@@ -1,0 +1,19 @@
+title: "AegisRAG Authentication Brute Force"
+id: d8a55a2d-a01a-4794-baec-3e5d19044707
+status: experimental
+description: "Ten or more failed authentications from one client within five minutes."
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - attack.credential-access
+  - attack.t1110
+correlation:
+  type: event_count
+  rules:
+    - aegis_auth_failed
+  group-by:
+    - details.client
+  timespan: 5m
+  condition:
+    gte: 10
+level: high

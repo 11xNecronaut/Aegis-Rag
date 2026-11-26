@@ -1,0 +1,18 @@
+title: "AegisRAG Poisoned Context Followed By Tool Call In One Request"
+id: 49e4e81a-1771-44bf-b2bb-91c87d1bf683
+status: experimental
+description: "Within a single request, injection content reached the model and the model then requested a tool call: the signature of a successful indirect injection."
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0051.001
+  - atlas.aml.t0053
+correlation:
+  type: temporal_ordered
+  rules:
+    - aegis_chunk_quarantined
+    - aegis_tool_requested
+  group-by:
+    - request_id
+  timespan: 2m
+level: critical

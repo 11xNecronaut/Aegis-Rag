@@ -1,0 +1,23 @@
+title: "AegisRAG Tool Call Denied By Policy"
+id: 0964ba70-98bf-48c7-816b-85b2ac839b35
+name: aegis_tool_denied
+status: experimental
+description: "The tool policy refused a model-proposed call. Often follows a successful injection."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0053
+  - owasp.llm06
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: tool_call_denied
+  condition: selection
+falsepositives:
+  - Model mistakes on benign requests.
+level: high

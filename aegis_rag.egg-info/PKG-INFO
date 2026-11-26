@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: aegis-rag
+Version: 0.2.0
+Summary: Security evaluation lab for multi-tenant RAG and tool-using agents
+Requires-Python: >=3.11
+Requires-Dist: fastapi>=0.115
+Requires-Dist: uvicorn[standard]>=0.30
+Requires-Dist: httpx>=0.27
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: pysigma>=0.11; extra == "dev"
+Requires-Dist: pysigma-backend-elasticsearch; extra == "dev"
+Provides-Extra: bedrock
+Requires-Dist: boto3; extra == "bedrock"

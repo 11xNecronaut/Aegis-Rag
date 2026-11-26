@@ -1,0 +1,23 @@
+title: "AegisRAG Sensitive Data Present In Output Without Redaction"
+id: 9822c8f1-4b32-48c8-9251-ddaa33de0828
+name: aegis_pii_exposed
+status: experimental
+description: "Sensitive identifiers appeared in an answer and output redaction was not active."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0057
+  - owasp.llm02
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: pii_in_output
+  condition: selection
+falsepositives:
+  - Legitimate security documentation or red-team exercises.
+level: medium

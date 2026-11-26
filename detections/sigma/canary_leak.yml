@@ -1,0 +1,23 @@
+title: "AegisRAG System Prompt Canary Leaked"
+id: 54e26e40-539b-4385-8381-25bceea27276
+name: aegis_canary_leak
+status: experimental
+description: "The system-prompt canary appeared in model output."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0056
+  - owasp.llm07
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: canary_leak
+  condition: selection
+falsepositives:
+  - None expected.
+level: critical

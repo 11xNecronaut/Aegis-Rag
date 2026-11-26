@@ -1,0 +1,24 @@
+title: "AegisRAG Suspicious Document Ingested"
+id: 704ff050-461f-4b32-8836-4058cc14b7b2
+name: aegis_document_flagged
+status: experimental
+description: "A document containing injection-style instructions was added to the knowledge base."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0070
+  - atlas.aml.t0071
+  - owasp.llm04
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: document_flagged
+  condition: selection
+falsepositives:
+  - Legitimate security documentation or red-team exercises.
+level: medium

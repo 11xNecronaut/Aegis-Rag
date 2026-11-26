@@ -1,0 +1,26 @@
+title: "AegisRAG Cross-Tenant Data Access"
+id: 4cd285a6-aa26-4e74-9aad-709f4ac6cd2d
+name: aegis_cross_tenant
+status: experimental
+description: "Another tenant's data was retrieved or served from cache for this user."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0057
+  - owasp.llm02
+  - owasp.llm08
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type:
+      - cross_tenant_retrieval
+      - cross_tenant_cache_hit
+  condition: selection
+falsepositives:
+  - None expected.
+level: critical

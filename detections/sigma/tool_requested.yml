@@ -1,0 +1,22 @@
+title: "AegisRAG Tool Call Requested By Model"
+id: 77b49a00-e732-457d-9133-6817aa76f93c
+name: aegis_tool_requested
+status: experimental
+description: "Informational: the model proposed a tool call. Used only as a building block for correlation."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0053
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: tool_call_requested
+  condition: selection
+falsepositives:
+  - Normal agent behaviour.
+level: informational

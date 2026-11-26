@@ -1,0 +1,25 @@
+title: "AegisRAG Model-Supplied Tenant Override On Tool Call"
+id: bec76382-8a10-4b94-9ea2-81d886a2d23d
+name: aegis_tenant_override
+status: experimental
+description: "A tool call carried a tenant identifier chosen by the model (confused deputy)."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0053
+  - owasp.llm06
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    - event_type: tenant_override_used
+    - event_type: tool_call_denied
+      details.tenant_override_attempt: true
+  condition: selection
+falsepositives:
+  - None expected.
+level: critical

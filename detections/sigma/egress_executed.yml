@@ -1,0 +1,24 @@
+title: "AegisRAG Agent Sent Data To Non-Allowlisted Destination"
+id: ce84c4a4-7118-4451-a3ba-970eff0c9133
+name: aegis_egress_external
+status: experimental
+description: "A tool sent data to a host outside the egress allowlist."
+references:
+  - https://atlas.mitre.org/
+  - https://genai.owasp.org/llm-top-10/
+author: AegisRAG
+date: 2026-11-21
+tags:
+  - atlas.aml.t0086
+  - owasp.llm06
+logsource:
+  product: aegisrag
+  service: application
+detection:
+  selection:
+    event_type: egress_executed
+    details.allowlisted: false
+  condition: selection
+falsepositives:
+  - None expected.
+level: critical
