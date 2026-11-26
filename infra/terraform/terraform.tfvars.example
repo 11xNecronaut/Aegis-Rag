@@ -1,0 +1,4 @@
+region             = "ap-south-1"
+bedrock_model_arns = ["arn:aws:bedrock:ap-south-1::foundation-model/REPLACE-WITH-A-MODEL-ID-AVAILABLE-IN-YOUR-REGION"]
+budget_alert_email = "you@example.com"
+monthly_budget_usd = 20
